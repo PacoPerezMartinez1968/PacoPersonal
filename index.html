@@ -22,6 +22,7 @@
 <body>
     <h2>Formulario de Evaluación de Proyectos</h2>
     <form id="proyectoForm">
+
         <!-- Línea de Propuesta de Valor -->
         <div class="section">
             <label><strong>Línea de Propuesta de Valor:</strong></label><br>
@@ -71,6 +72,7 @@
             <label for="justificacion"><strong>Justificación:</strong></label><br>
             <textarea id="justificacion" name="justificacion" rows="4" cols="50" readonly></textarea>
         </div>
+
     </form>
 
     <script>
@@ -87,20 +89,23 @@
 
         // Cargar el archivo JSON con fetch
         async function cargarDatosJSON() {
+            const jsonURL = 'https://raw.githubusercontent.com/PacoPerezMartinez1968/tu-repositorio/main/tabla_recomendaciones.json'; // Cambia esta URL con la correcta
+            
             try {
-                const response = await fetch('tabla_recomendaciones.json');
+                const response = await fetch(jsonURL);
                 if (!response.ok) {
                     throw new Error('Error al cargar el archivo JSON');
                 }
                 const data = await response.json();
-                return data.recomendaciones; // Verifica si los datos están en la clave 'recomendaciones'
+                console.log('Datos cargados correctamente:', data); // Verifica que los datos se cargan correctamente
+                return data.recomendaciones; // Verifica que 'recomendaciones' existe en tu JSON
             } catch (error) {
                 console.error('Error al cargar el archivo JSON:', error);
                 return [];
             }
         }
 
-        // Función para determinar el framework y la justificación
+        // Función para actualizar los campos de metodología y justificación
         async function determinarFrameworkYJustificacion() {
             if (!todosSeleccionados()) {
                 // Si no todos los grupos tienen una selección, limpiar los campos y salir
