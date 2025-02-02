@@ -93,7 +93,7 @@
                     throw new Error('Error al cargar el archivo JSON');
                 }
                 const data = await response.json();
-                return data.recomendaciones;
+                return data.recomendaciones; // Verifica si los datos están en la clave 'recomendaciones'
             } catch (error) {
                 console.error('Error al cargar el archivo JSON:', error);
                 return [];
@@ -114,6 +114,8 @@
             const modeloContrato = document.querySelector('input[name="modelo_contrato"]:checked').value;
             const presupuesto = document.querySelector('input[name="presupuesto"]:checked').value;
             const duracion = document.querySelector('input[name="duracion"]:checked').value;
+
+            console.log('Valores seleccionados:', propuestaValor, naturalezaProyecto, modeloContrato, presupuesto, duracion);
 
             // Cargar las recomendaciones desde el JSON
             const recomendaciones = await cargarDatosJSON();
