@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Evaluación de Proyectos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <h2>Formulario de Evaluación de Proyectos</h2>
+    <form id="proyectoForm">
+        <!-- Línea de Propuesta de Valor -->
+        <div class="section">
+            <label><strong>Línea de Propuesta de Valor:</strong></label><br>
+            <input type="radio" name="propuesta_valor" value="Artificial Intelligence (AI)"> Artificial Intelligence (AI)<br>
+            <input type="radio" name="propuesta_valor" value="Machine Learning"> Machine Learning<br>
+            <input type="radio" name="propuesta_valor" value="Data Analytics"> Data Analytics<br>
+        </div>
+
+        <!-- Naturaleza del Proyecto -->
+        <div class="section">
+            <label><strong>Naturaleza del Proyecto:</strong></label><br>
+            <input type="radio" name="naturaleza_proyecto" value="Única (una solución)"> Única (una solución)<br>
+            <input type="radio" name="naturaleza_proyecto" value="Múltiple (varias soluciones)"> Múltiple (varias soluciones)<br>
+        </div>
+
+        <!-- Modelo de Contrato -->
+        <div class="section">
+            <label><strong>Modelo de Contrato:</strong></label><br>
+            <input type="radio" name="modelo_contrato" value="Fixed Price"> Fixed Price<br>
+            <input type="radio" name="modelo_contrato" value="Time & Material"> Time & Material<br>
+        </div>
+
+        <!-- Proyectos según presupuesto -->
+        <div class="section">
+            <label><strong>Presupuesto del Proyecto:</strong></label><br>
+            <input type="radio" name="presupuesto" value="> 100K€"> > 100K€<br>
+            <input type="radio" name="presupuesto" value="< 25K€"> < 25K€<br>
+            <input type="radio" name="presupuesto" value="25K€ - 100K€"> 25K€ - 100K€<br>
+        </div>
+
+        <!-- Proyectos según duración -->
+        <div class="section">
+            <label><strong>Duración del Proyecto:</strong></label><br>
+            <input type="radio" name="duracion" value="> 300 m/d"> > 300 m/d<br>
+            <input type="radio" name="duracion" value="< 30 m/d"> < 30 m/d<br>
+            <input type="radio" name="duracion" value="30 - 300 m/d"> 30 - 300 m/d<br>
+        </div>
+
+        <!-- Framework / Metodología Recomendada -->
+        <div class="section">
+            <label for="metodologia"><strong>Framework / Metodología Recomendada:</strong></label><br>
+            <textarea id="metodologia" name="metodologia" readonly></textarea>
+        </div>
+
+        <!-- Justificación -->
+        <div class="section">
+            <label for="justificacion"><strong>Justificación:</strong></label><br>
+            <textarea id="justificacion" name="justificacion" rows="4" cols="50" readonly></textarea>
+        </div>
+    </form>
+
+    <script>
+        // Función para verificar si todos los grupos de radio buttons tienen una selección
+        function todosSeleccionados() {
+            const grupos = ['propuesta_valor', 'naturaleza_proyecto', 'modelo_contrato', 'presupuesto', 'duracion'];
+            for (const grupo of grupos) {
+                if (!document.querySelector(`input[name="${grupo}"]:checked`)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Cargar el archivo JSON con fetch
+        async function cargarDatosJSON() {
+            try {
+                const response = await fetch('tabla_recomendaciones.json');
+                if (!response.ok) {
+                    throw new Error('Error al cargar el archivo JSON');
+                }
+                const data = await response.json();
+                return data.recomendaciones;
+            } catch (error) {
+                console.error('Error al cargar el archivo JSON:', error);
+                return [];
+            }
+        }
+
+        // Función para determinar el framework y la justificación
+        async function determinarFrameworkYJustificacion() {
+            if (!todosSeleccionados()) {
+                // Si no todos los grupos tienen una selección, limpiar los campos y salir
+                document.getElementById('metodologia').value = '';
+                document.getElementById('justificacion').value = '';
+                return;
+            }
+
+            const propuestaValor = document.querySelector('input[name="propuesta_valor"]:checked').value;
+            const naturalezaProyecto = document.querySelector('input[name="naturaleza_proyecto"]:checked').value;
+            const modeloContrato = document.querySelector('input[name="modelo_contrato"]:checked').value;
+            const presupuesto = document.querySelector('input[name="presupuesto"]:checked').value;
+            const duracion = document.querySelector('input[name="duracion"]:checked').value;
+
+            // Cargar las recomendaciones desde el JSON
+            const recomendaciones = await cargarDatosJSON();
+
+            // Buscar la recomendación en el JSON
+            const recomendacion = recomendaciones.find(rec =>
+                rec['Línea de Propuesta de Valor'] === propuestaValor &&
+                rec['Naturaleza del Proyecto'] === naturalezaProyecto &&
+                rec['Modelo de Contrato'] === modeloContrato &&
+                rec['Proyectos de > 100K€'] === presupuesto &&
+                rec['Proyectos de > 300 m/d'] === duracion
+            );
+
+            if (recomendacion) {
+                document.getElementById('metodologia').value = recomendacion['Framework/Metodología Recomendada'];
+                document.getElementById('justificacion').value = recomendacion['Justificación'];
+            } else {
+                document.getElementById('metodologia').value = 'No se encontró una recomendación para los criterios seleccionados.';
+                document.getElementById('justificacion').value = '';
+            }
+        }
+
+        // Agregar eventos a los campos relevantes para actualizar la metodología y justificación
+        document.querySelectorAll('input[name="propuesta_valor"], input[name="naturaleza_proyecto"], input[name="modelo_contrato"], input[name="presupuesto"], input[name="duracion"]').forEach(elemento => {
+            elemento.addEventListener('change', determinarFrameworkYJustificacion);
+        });
+    </script>
+</body>
+</html>
